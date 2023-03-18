@@ -9,7 +9,7 @@ from PDBSpider import PDBSpider
 parser = argparse.ArgumentParser('Crawling for chain information on Protein Data Bank website.')
 parser.add_argument('--input_path', help='list for pdb id, one for each line.')
 parser.add_argument('--output_path', default=None, help='output file. If None, input file path suffixed with ".out" will be used.')
-parser.add_argument('--continu', action='store_true', help='whether or not go on crawling for data from previous results. If set this argument, all pdb entries already existing in the output file will be skipped.')
+parser.add_argument('--continu', action='store_true', help='whether or not continue crawling for data with previous results. If set this argument, all pdb entries already existing in the output file will be skipped.')
 args = parser.parse_args()
 print(args)
 

@@ -23,7 +23,7 @@ pip install -r requirement.txt
 It is very easy to run this project. The only mandatory input is `--input_path`, which is a file with each PDB id in one line. Here is an demo you can follow.
 
 ```bash
-# python main.py [-h] [--input_path INPUT_PATH] [--output_path OUTPUT_PATH]
+# python main.py [-h] [--input_path INPUT_PATH] [--output_path OUTPUT_PATH] [--continu]
 python main.py --input_path ./input_demo.txt
 ```
 
@@ -34,4 +34,5 @@ options:
   - `--input_path` INPUT_PATH: list for pdb id, one for each line.
 
   - `--output_path` OUTPUT_PATH: output file. If None, input file path suffixed with ".out" will be used.
+  - `--continu`             whether or not continue crawling for data with previous results. If set this argument, all pdb entries already existing in the output file will be skipped.
 

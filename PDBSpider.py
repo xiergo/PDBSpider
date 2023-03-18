@@ -16,6 +16,8 @@ class PDBSpider:
         return soup
 
     def _get_content_from_keyword(self, soup, pattern, type = None):
+        if not soup:
+            return ''
         if type:
             ls = [x.text.replace('&nbsp',' ').replace('\xa0', '') for x in soup.find_all(type)]
         else:
@@ -31,6 +33,8 @@ class PDBSpider:
     def _get_all_single_chains(self):
         chains = []
         soup = self.soup.find('div', {'id': 'macromoleculespanel'})
+        if not soup:
+            return chains
         for table in soup.find_all('table', {'class': "table table-bordered table-condensed tableEntity"}):
             chain = {}
             tds = [i.text.replace('\xa0', ' ') for i in table.find_all('td')]
@@ -73,12 +77,6 @@ class PDBSpider:
         content['global_stoichiometry'] = self._get_content_from_keyword(soup, 'Global Stoichiometry: (.+)').replace('(3D View)', '').strip()
         content['local_symmetry'] = self._get_content_from_keyword(soup, 'Local Symmetry: (.+)').replace('(3D View)', '').strip()
         content['local_stoichiometry'] = self._get_content_from_keyword(soup, 'Local Stoichiometry: (.+)').replace('(3D View)', '').strip()
-
         # single chains
         content['chains'] = self._get_all_single_chains()
-
         return content
-
-
-
-

@@ -30,9 +30,16 @@ def main():
         pdb_list = list(set(pdb_list) - set(pdb_exist))
     
     for i, pdb_id in tqdm(enumerate(pdb_list)):
-        spider = PDBSpider(pdb_id)
+        try:
+            spider = PDBSpider(pdb_id)
+        except:
+            print(f'{pdb_id} failed')
+            continue
         res_dict = spider.get_content()
         chains = res_dict.pop('chains')
+        if not chains:
+            chains = [{'pdb_id': pdb_id, 'molecule': '', 'chains': '',
+                    'seqence_length': '', 'organism': '', 'details': ''}]
         df_chains = pd.DataFrame(chains)
         df = pd.merge(df_chains, pd.DataFrame([res_dict]), on='pdb_id')
         if (i == 0) and (not args.continu):

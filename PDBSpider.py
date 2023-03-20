@@ -1,5 +1,7 @@
 import re
+import sys
 import urllib.request
+import pandas as pd
 from bs4 import BeautifulSoup
 
 class PDBSpider:
@@ -27,7 +29,7 @@ class PDBSpider:
         for x in ls:
             cont=re.search(pattern, x)
             if cont:
-                return cont.group(1).strip()
+                return cont.group(1).strip().replace('\n', ' ')
         return ''
     
     def _get_all_single_chains(self):
@@ -37,13 +39,17 @@ class PDBSpider:
             return chains
         for table in soup.find_all('table', {'class': "table table-bordered table-condensed tableEntity"}):
             chain = {}
-            tds = [i.text.replace('\xa0', ' ') for i in table.find_all('td')]
+            tds = table.find_all('td')
+            for i in [1, 4]:
+                if tds[i].find('div', {'class': 'hide'}):
+                    tds[i] = tds[i].find('div', {'class': 'hide'})
+            tds = [i.text.replace('\xa0', ' ').replace('\n', ' ') for i in tds]
             chain['pdb_id'] = self.pdb_id
             chain['molecule'] = tds[0]
-            chain['chains'] = tds[1]
+            chain['chains'] = tds[1].replace('Less', '').strip()
             chain['sequence_length'] = tds[2]
             chain['organism'] = tds[3]
-            chain['details'] = tds[4]
+            chain['details'] = tds[4].replace('Less', '').strip()
             chains.append(chain)
         return chains
     
@@ -80,3 +86,25 @@ class PDBSpider:
         # single chains
         content['chains'] = self._get_all_single_chains()
         return content
+
+
+def main():
+    out_path = sys.argv[1]
+    pdbs = sys.argv[2:]
+    for pdb_id in pdbs:
+        try:
+            spider = PDBSpider(pdb_id)
+        except:
+            print(f'{pdb_id} failed')
+            continue
+        res_dict = spider.get_content()
+        chains = res_dict.pop('chains')
+        if not chains:
+            chains = [{'pdb_id': pdb_id, 'molecule': '', 'chains': '',
+                    'seqence_length': '', 'organism': '', 'details': ''}]
+        df_chains = pd.DataFrame(chains)
+        df = pd.merge(df_chains, pd.DataFrame([res_dict]), on='pdb_id')
+        df.to_csv(out_path, sep='\t', mode='a', header=False, index=False)
+
+if __name__ == '__main__':
+    main()
